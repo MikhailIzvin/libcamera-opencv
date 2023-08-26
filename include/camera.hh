@@ -1,14 +1,21 @@
+#include <functional>
 #include <libcamera/libcamera.h>
 #include <memory>
-#include <opencv2/opencv.hpp>
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
+struct YUV420
+{
+    std::vector<std::uint8_t> Y;
+    std::vector<std::uint8_t> U;
+    std::vector<std::uint8_t> V;
+};
+
 class Camera
 {
   public:
-    Camera(const Napi::CallbackInfo &info);
+    Camera(int width, int height, std::function<YUV420 &>);
     ~Camera();
 
   private:
@@ -26,8 +33,7 @@ class Camera
     libcamera::Stream *stream;
     int stride, width, height;
 
-    // buffers for opencv
   private:
-    std::uint8_t *yuv420_buffer;
-    std::uint8_t *rgb_buffer;
+    YUV420 yuv;
+    std::function<YUV420 &> func;
 };
