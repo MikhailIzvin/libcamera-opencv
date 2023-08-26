@@ -25,4 +25,9 @@ class Camera
     libcamera::FrameBufferAllocator *allocator;
     libcamera::Stream *stream;
     int stride, width, height;
+
+    // buffers for opencv
+  private:
+    std::uint8_t *yuv420_buffer;
+    std::uint8_t *rgb_buffer;
 };

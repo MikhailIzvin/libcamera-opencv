@@ -89,8 +89,11 @@ Camera::Camera(int width, int height)
         requests.push_back(std::move(request));
     }
 
-    // Reserve buffer for node
-    node_buffer = new std::uint8_t[width * height * 3];
+    // Reserve buffer for yuv
+    yuv420_buffer = new std::uint8_t[width * height * 3 / 2];
+
+    // Reserve buffer for rgb
+    rgb_buffer = new std::uint8_t[width * height * 3];
 
     // Set callack for video frames
     camera->requestCompleted.connect(this, &Camera::camera_callback);
@@ -110,4 +113,43 @@ Camera::~Camera()
     camera->release();
     camera.reset();
     cm->stop();
+    delete[] yuv420_buffer;
+    delete[] rgb_buffer;
+}
+
+void Camera::camera_callback(libcamera::Request *request)
+{
+    if (request->status() != libcamera::Request::RequestComplete)
+        return;
+
+    libcamera::FrameBuffer *buffer = request->buffers().find(stream)->second;
+    std::vector<libcamera::Span<uint8_t>> const &mem = mapped_buffers_[buffer];
+
+    unsigned w = width, h = height, s = stride;
+    uint8_t *Y = (uint8_t *)mem[0].data();
+    uint8_t *y_b = yuv420_buffer;
+    for (unsigned int j = 0; j < h; j++)
+    {
+        memcpy(y_b + j * w, Y + j * s, w);
+    }
+
+    uint8_t *U = (uint8_t *)mem[1].data();
+    uint8_t *u_b = y_b + w * h;
+    h /= 2, w /= 2, s /= 2;
+    for (unsigned int j = 0; j < h; j++)
+    {
+        memcpy(u_b + j * w, U + j * s, w);
+    }
+
+    uint8_t *V = (uint8_t *)mem[2].data();
+    uint8_t *v_b = u_b + w * h;
+    for (unsigned int j = 0; j < h; j++)
+    {
+        memcpy(v_b + j * w, V + j * s, w);
+    }
+
+    // There you have yuv420 buffer. Good luck :)
+
+    request->reuse(libcamera::Request::ReuseBuffers);
+    camera->queueRequest(request);
 }
