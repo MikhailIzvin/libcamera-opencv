@@ -1,4 +1,5 @@
 #include <libcamera/libcamera.h>
+#include <memory>
 #include <opencv2/opencv.hpp>
 #include <sys/mman.h>
 #include <sys/stat.h>
