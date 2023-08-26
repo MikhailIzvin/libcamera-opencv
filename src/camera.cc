@@ -101,3 +101,13 @@ Camera::Camera(int width, int height)
     for (std::unique_ptr<libcamera::Request> &request : requests)
         camera->queueRequest(request.get());
 }
+
+Camera::~Camera()
+{
+    camera->stop();
+    allocator->free(stream);
+    delete allocator;
+    camera->release();
+    camera.reset();
+    cm->stop();
+}
