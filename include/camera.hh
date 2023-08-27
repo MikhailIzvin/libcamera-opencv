@@ -15,12 +15,13 @@ struct YUV420
 class Camera
 {
   public:
-    Camera(int width, int height, std::function<YUV420 &>);
+    Camera(int width, int height, std::function<YUV420 *>);
     ~Camera();
 
   private:
     // Callback for recieved frames
     void camera_callback(libcamera::Request *);
+    void yuv2rgb(std::vector<std::uint8_t> &buffer);
 
   private:
     // Camera settings part
@@ -35,5 +36,5 @@ class Camera
 
   private:
     YUV420 yuv;
-    std::function<YUV420 &> func;
+    std::function<YUV420 *> func;
 };

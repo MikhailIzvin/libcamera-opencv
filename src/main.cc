@@ -1,18 +1,74 @@
+#include <functional>
 #include <iostream>
 
-struct YUV420
+using VF = std::function<void(int, int)>;
+
+class Test
 {
-    std::vector<std::uint8_t> Y;
-    std::vector<std::uint8_t> U;
-    std::vector<std::uint8_t> V;
+  private:
+    int x, y;
+    VF _func;
+
+  public:
+    Test(VF func)
+    {
+        _func = func;
+        x = 1;
+        y = 2;
+    }
+
+    void callback()
+    {
+        _func(x, y);
+    }
+
+    void print()
+    {
+        std::cout << x + y << std::endl;
+    }
 };
+
+void ex(int x, int y)
+{
+    std::cout << x + y << std::endl;
+}
 
 int main()
 {
-    YUV420 yuv = YUV420{
-        std::vector<std::uint8_t>(420),
-        std::vector<std::uint8_t>(420),
-        std::vector<std::uint8_t>(420)};
-
-    std::cout << yuv.Y.size() << std::endl;
+    // Test test(ex);
+    // test.callback();
+    int ao = 480 & ~3;
+    std::cout << ao << std::endl;
 }
+
+// #include <functional>
+// #include <iostream>
+// #include <string>
+
+// typedef std::function<void(int)> FlyFunc;
+
+// class Duck
+// {
+//   public:
+//     Duck(FlyFunc flyFunc)
+//     {
+//         _flyFunc = flyFunc;
+//         x = 33;
+//     }
+//     void run() { _flyFunc(x); }
+
+//   private:
+//     FlyFunc _flyFunc;
+//     int x;
+// };
+
+// void fly(int x)
+// {
+//     std::cout << x << std::endl;
+// }
+
+// int main()
+// {
+//     Duck d(fly);
+//     d.run();
+// }
